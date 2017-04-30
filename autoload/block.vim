@@ -1,7 +1,7 @@
 
 " vim-blocks - Bite-size blocks for tab & status lines
 " Maintainer: Rafael Bodill <justrafi at gmail dot com>
-" Version:    0.1
+" Version:    0.2
 "-------------------------------------------------
 
 " Configuration {{{
@@ -25,7 +25,7 @@ let g:blk_filename_max_dir_chars =
 " Less verbosity on specific filetypes (regexp)
 let g:blk_quiet_filetypes =
 	\ get(g:, 'blk_quiet_filetypes',
-	\ 'qf\|help\|unite\|vimfiler\|gundo\|diff\|fugitive\|gitv')
+	\ 'qf\|help\|denite\|unite\|vimfiler\|gundo\|diff\|fugitive\|gitv\|magit')
 " }}}
 
 " Clear cache on save {{{
@@ -91,10 +91,10 @@ function! block#filename() abort " {{{
 	endif
 
 	" VimFiler status string
-	if &ft ==# 'vimfiler'
+	if &filetype ==# 'vimfiler'
 		let b:blk_cache_filename = vimfiler#get_status_string()
 	" Empty if owned by certain plugins
-	elseif &ft =~? g:blk_quiet_filetypes
+	elseif &filetype =~? g:blk_quiet_filetypes
 		let b:blk_cache_filename = ''
 	" Placeholder for empty buffer
 	elseif expand('%:t') ==? ''
@@ -145,7 +145,7 @@ endfunction
 function! block#branch() abort " {{{
 	" Returns git branch name, using different plugins.
 
-	if &ft !~? g:blk_quiet_filetypes
+	if &filetype !~? g:blk_quiet_filetypes
 		if exists('*gitbranch#name')
 			return gitbranch#name()
 		elseif exists('*vcs#info')
@@ -161,7 +161,7 @@ endfunction
 function! block#syntax() abort " {{{
 	" Returns syntax warnings from several plugins (Neomake and syntastic)
 
-	if &ft =~? g:blk_quiet_filetypes
+	if &filetype =~? g:blk_quiet_filetypes
 		return ''
 	endif
 
@@ -215,10 +215,10 @@ function! block#mode(...) abort " {{{
 	"   Zoomed buffer symbol, default: Z
 
 	let s:modes = ''
-	if &ft !~? g:blk_quiet_filetypes && &readonly
+	if &filetype !~? g:blk_quiet_filetypes && &readonly
 		let s:modes .= a:0 > 0 ? a:1 : 'R'
 	endif
-	if exists('t:zoomed') && bufnr('%') == t:zoomed
+	if exists('t:zoomed') && bufnr('%') == t:zoomed.nr
 		let s:modes .= a:0 > 1 ? a:2 : 'Z'
 	endif
 
@@ -229,7 +229,7 @@ endfunction
 function! block#format() abort " {{{
 	" Returns file format
 
-	return &ft =~? g:blk_quiet_filetypes ? '' : &ff
+	return &filetype =~? g:blk_quiet_filetypes ? '' : &fileformat
 endfunction
 
 " }}}
@@ -239,6 +239,16 @@ function! block#session(...) abort "{{{
 	"   Active session symbol, default: [S]
 
 	return empty(v:this_session) ? '' : a:0 == 1 ? a:1 : '[S]'
+endfunction
+" }}}
+
+function! block#loading() abort "{{{
+	if exists('*gutentags#statusline')
+		return gutentags#statusline('[*]')
+	elseif exists('g:SessionLoad') && g:SessionLoad == 1
+		return '[s]'
+	endif
+	return ''
 endfunction
 " }}}
 
