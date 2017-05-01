@@ -1,5 +1,5 @@
 
-" vim-blocks - Bite-size blocks for tab & status lines
+" vim-badge - Bite-size badges for tab & status lines
 " Maintainer: Rafael Bodill <justrafi at gmail dot com>
 " Version:    0.2
 "-------------------------------------------------
@@ -36,7 +36,7 @@ augroup statusline-cache
 augroup END
 " }}}
 
-function! block#label(n, ...) abort "{{{
+function! badge#label(n, ...) abort "{{{
 	" Returns a specific tab's label
 	" Parameters:
 	"   n: Tab number
@@ -73,15 +73,15 @@ function! block#label(n, ...) abort "{{{
 endfunction
 
 " }}}
-function! block#project() abort "{{{
+function! badge#project() abort "{{{
 	" Try to guess the project's name
 
-	let dir = block#root()
+	let dir = badge#root()
 	return fnamemodify(dir ? dir : getcwd(), ':t')
 endfunction
 
 " }}}
-function! block#filename() abort " {{{
+function! badge#filename() abort " {{{
 	" Provides relative path with limited characters in each directory name, and
 	" limits number of total directories. Caches the result for current buffer.
 
@@ -119,7 +119,7 @@ function! block#filename() abort " {{{
 endfunction
 
 " }}}
-function! block#root() abort "{{{
+function! badge#root() abort "{{{
 	" Find the root directory by searching for the version-control dir
 
 	let dir = getbufvar('%', 'project_dir')
@@ -142,7 +142,7 @@ function! block#root() abort "{{{
 endfunction
 
 " }}}
-function! block#branch() abort " {{{
+function! badge#branch() abort " {{{
 	" Returns git branch name, using different plugins.
 
 	if &filetype !~? g:badge_quiet_filetypes
@@ -158,7 +158,7 @@ function! block#branch() abort " {{{
 endfunction
 
 " }}}
-function! block#syntax() abort " {{{
+function! badge#syntax() abort " {{{
 	" Returns syntax warnings from several plugins (Neomake and syntastic)
 
 	if &filetype =~? g:badge_quiet_filetypes
@@ -178,7 +178,7 @@ function! block#syntax() abort " {{{
 endfunction
 
 " }}}
-function! block#trails(...) abort " {{{
+function! badge#trails(...) abort " {{{
 	" Detect trailing whitespace and cache result per buffer
 	" Parameters:
 	"   Whitespace warning message, use %s for line number, default: WS:%s
@@ -197,7 +197,7 @@ function! block#trails(...) abort " {{{
 endfunction
 
 " }}}
-function! block#modified(...) abort " {{{
+function! badge#modified(...) abort " {{{
 	" Make sure we ignore &modified when choosewin is active
 	" Parameters:
 	"   Modified symbol, default: +
@@ -208,7 +208,7 @@ function! block#modified(...) abort " {{{
 endfunction
 
 " }}}
-function! block#mode(...) abort " {{{
+function! badge#mode(...) abort " {{{
 	" Returns file's mode: read-only and/or zoomed
 	" Parameters:
 	"   Read-only symbol, default: R
@@ -226,14 +226,14 @@ function! block#mode(...) abort " {{{
 endfunction
 
 " }}}
-function! block#format() abort " {{{
+function! badge#format() abort " {{{
 	" Returns file format
 
 	return &filetype =~? g:badge_quiet_filetypes ? '' : &fileformat
 endfunction
 
 " }}}
-function! block#session(...) abort "{{{
+function! badge#session(...) abort "{{{
 	" Returns an indicator for active session
 	" Parameters:
 	"   Active session symbol, default: [S]
@@ -242,7 +242,7 @@ function! block#session(...) abort "{{{
 endfunction
 " }}}
 
-function! block#loading() abort "{{{
+function! badge#loading() abort "{{{
 	if exists('*gutentags#statusline')
 		return gutentags#statusline('[*]')
 	elseif exists('g:SessionLoad') && g:SessionLoad == 1
