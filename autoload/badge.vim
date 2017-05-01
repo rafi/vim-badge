@@ -242,7 +242,7 @@ function! badge#session(...) abort "{{{
 endfunction
 " }}}
 
-function! badge#loading() abort "{{{
+function! badge#indexing() abort "{{{
 	if exists('*gutentags#statusline')
 		return gutentags#statusline('[*]')
 	elseif exists('g:SessionLoad') && g:SessionLoad == 1
