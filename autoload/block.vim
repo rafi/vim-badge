@@ -7,32 +7,32 @@
 " Configuration {{{
 
 " Limit display of directories in path
-let g:blk_tab_display_max_dirs =
-	\ get(g:, 'blk_tab_display_max_dirs', 1)
+let g:badge_label_max_dirs =
+	\ get(g:, 'badge_label_max_dirs', 1)
 
 " Limit display of characters in each directory in path
-let g:blk_tab_display_max_dir_chars =
-	\ get(g:, 'blk_tab_display_max_dir_chars', 8)
+let g:badge_label_max_dir_chars =
+	\ get(g:, 'badge_label_max_dir_chars', 8)
 
 " Maximum number of directories in filepath
-let g:blk_filename_max_dirs =
-	\ get(g:, 'blk_filename_max_dirs', 3)
+let g:badge_filename_max_dirs =
+	\ get(g:, 'badge_filename_max_dirs', 3)
 
 " Maximum number of characters in each directory
-let g:blk_filename_max_dir_chars =
-	\ get(g:, 'blk_filename_max_dir_chars', 5)
+let g:badge_filename_max_dir_chars =
+	\ get(g:, 'badge_filename_max_dir_chars', 5)
 
 " Less verbosity on specific filetypes (regexp)
-let g:blk_quiet_filetypes =
-	\ get(g:, 'blk_quiet_filetypes',
+let g:badge_quiet_filetypes =
+	\ get(g:, 'badge_quiet_filetypes',
 	\ 'qf\|help\|denite\|unite\|vimfiler\|gundo\|diff\|fugitive\|gitv\|magit')
 " }}}
 
 " Clear cache on save {{{
 augroup statusline-cache
 	autocmd!
-	autocmd BufWritePost *
-		\ unlet! b:blk_cache_trails b:blk_cache_syntax b:blk_cache_filename
+	autocmd BufWritePre *
+		\ unlet! b:badge_cache_trails b:badge_cache_syntax b:badge_cache_filename
 augroup END
 " }}}
 
@@ -58,11 +58,11 @@ function! block#label(n, ...) abort "{{{
 
 		" Shorten dir names
 		let short = substitute(filepath,
-			\ "[^/]\\{".g:blk_tab_display_max_dir_chars."}\\zs[^/]\*\\ze/", '', 'g')
+			\ "[^/]\\{".g:badge_label_max_dir_chars."}\\zs[^/]\*\\ze/", '', 'g')
 		" Decrease dir count
 		let parts = split(short, '/')
-		if len(parts) > g:blk_tab_display_max_dirs
-			let parts = parts[-g:blk_tab_display_max_dirs-1 : ]
+		if len(parts) > g:badge_label_max_dirs
+			let parts = parts[-g:badge_label_max_dirs-1 : ]
 		endif
 		let filepath = join(parts, '/')
 
@@ -86,36 +86,36 @@ function! block#filename() abort " {{{
 	" limits number of total directories. Caches the result for current buffer.
 
 	" Use buffer's cached filepath
-	if exists('b:blk_cache_filename') && len(b:blk_cache_filename) > 0
-		return b:blk_cache_filename
+	if exists('b:badge_cache_filename') && len(b:badge_cache_filename) > 0
+		return b:badge_cache_filename
 	endif
 
 	" VimFiler status string
 	if &filetype ==# 'vimfiler'
-		let b:blk_cache_filename = vimfiler#get_status_string()
+		let b:badge_cache_filename = vimfiler#get_status_string()
 	" Empty if owned by certain plugins
-	elseif &filetype =~? g:blk_quiet_filetypes
-		let b:blk_cache_filename = ''
+	elseif &filetype =~? g:badge_quiet_filetypes
+		let b:badge_cache_filename = ''
 	" Placeholder for empty buffer
 	elseif expand('%:t') ==? ''
-		let b:blk_cache_filename = 'N/A'
+		let b:badge_cache_filename = 'N/A'
 	" Regular file
 	else
 		" Shorten dir names
-		let short = substitute(expand('%'), "[^/]\\{".g:blk_filename_max_dir_chars."}\\zs[^/]\*\\ze/", '', 'g')
+		let short = substitute(expand('%'), "[^/]\\{".g:badge_filename_max_dir_chars."}\\zs[^/]\*\\ze/", '', 'g')
 		" Decrease dir count
 		let parts = split(short, '/')
-		if len(parts) > g:blk_filename_max_dirs
-			let parts = parts[-g:blk_filename_max_dirs-1 : ]
+		if len(parts) > g:badge_filename_max_dirs
+			let parts = parts[-g:badge_filename_max_dirs-1 : ]
 		endif
-		let b:blk_cache_filename = join(parts, '/')
+		let b:badge_cache_filename = join(parts, '/')
 	endif
 
 	if exists('b:fugitive_type') && b:fugitive_type ==# 'blob'
-		let b:blk_cache_filename .= ' (blob)'
+		let b:badge_cache_filename .= ' (blob)'
 	endif
 
-	return b:blk_cache_filename
+	return b:badge_cache_filename
 endfunction
 
 " }}}
@@ -145,7 +145,7 @@ endfunction
 function! block#branch() abort " {{{
 	" Returns git branch name, using different plugins.
 
-	if &filetype !~? g:blk_quiet_filetypes
+	if &filetype !~? g:badge_quiet_filetypes
 		if exists('*gitbranch#name')
 			return gitbranch#name()
 		elseif exists('*vcs#info')
@@ -161,20 +161,20 @@ endfunction
 function! block#syntax() abort " {{{
 	" Returns syntax warnings from several plugins (Neomake and syntastic)
 
-	if &filetype =~? g:blk_quiet_filetypes
+	if &filetype =~? g:badge_quiet_filetypes
 		return ''
 	endif
 
-	if ! exists('b:blk_cache_syntax')
-		let b:blk_cache_syntax = ''
+	if ! exists('b:badge_cache_syntax') || empty(b:badge_cache_syntax)
+		let b:badge_cache_syntax = ''
 		if exists('*neomake#Make')
-			let b:blk_cache_syntax = neomake#statusline#LoclistStatus()
+			let b:badge_cache_syntax = neomake#statusline#LoclistStatus()
 		elseif exists('*SyntasticStatuslineFlag')
-			let b:blk_cache_syntax = SyntasticStatuslineFlag()
+			let b:badge_cache_syntax = SyntasticStatuslineFlag()
 		endif
 	endif
 
-	return b:blk_cache_syntax
+	return b:badge_cache_syntax
 endfunction
 
 " }}}
@@ -183,17 +183,17 @@ function! block#trails(...) abort " {{{
 	" Parameters:
 	"   Whitespace warning message, use %s for line number, default: WS:%s
 
-	if ! exists('b:blk_cache_trails')
-		let b:blk_cache_trails = ''
+	if ! exists('b:badge_cache_trails')
+		let b:badge_cache_trails = ''
 		if ! &readonly && &modifiable && line('$') < 9000
 			let trailing = search('\s$', 'nw')
 			if trailing != 0
 				let label = a:0 == 1 ? a:1 : 'WS:%s'
-				let b:blk_cache_trails .= printf(label, trailing)
+				let b:badge_cache_trails .= printf(label, trailing)
 			endif
 		endif
 	endif
-	return b:blk_cache_trails
+	return b:badge_cache_trails
 endfunction
 
 " }}}
@@ -215,7 +215,7 @@ function! block#mode(...) abort " {{{
 	"   Zoomed buffer symbol, default: Z
 
 	let s:modes = ''
-	if &filetype !~? g:blk_quiet_filetypes && &readonly
+	if &filetype !~? g:badge_quiet_filetypes && &readonly
 		let s:modes .= a:0 > 0 ? a:1 : 'R'
 	endif
 	if exists('t:zoomed') && bufnr('%') == t:zoomed.nr
@@ -229,7 +229,7 @@ endfunction
 function! block#format() abort " {{{
 	" Returns file format
 
-	return &filetype =~? g:blk_quiet_filetypes ? '' : &fileformat
+	return &filetype =~? g:badge_quiet_filetypes ? '' : &fileformat
 endfunction
 
 " }}}
